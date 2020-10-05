@@ -1,31 +1,44 @@
+let link = "http://localhost:65276/api/student";
+const ajaxCall = (httpMethod, link, data, callBackMethod) => {
+  $.ajax({
+    type: httpMethod,
+    url: link,
+    data: data,
+    success: callBackMethod,
+  });
+};
+
 let table = $("#table_data");
 let save_index = null;
-let getData = JSON.parse(localStorage.getItem("STUDENT"));
-if (getData != null) {
-  for (i = 0; i < getData.length; i++) {
-    let table_row = `<tr id=row${i}>
-          <td>${getData[i].name}</td>
-          <td >${getData[i].email}</td>
-          <td >${getData[i].password}</td>
-          <td >${getData[i].confirm_password}</td>
-          <td >${getData[i].phone_no}</td>
-          <td> <button onclick="editStudent(${i})" id="edit${i}">Edit</button></td>
-          <td><button onclick="deleteStudent(${i})" id="delete${i}">Delete</button></td>
-          </tr>`;
-    table.append(table_row);
+let getData;
+ajaxCall("GET", link, "json", function (data) {
+  getData = data;
+  if (data != null) {
+    for (i = 0; i < data.length; i++) {
+      let table_row = `<tr id=row${i}>
+              <td>${data[i].name}</td>
+              <td >${data[i].email}</td>
+              <td >${data[i].password}</td>
+              <td >${data[i].confirmPassword}</td>
+              <td >${data[i].phoneNo}</td>
+              <td> <button onclick="editStudent(${data[i].studentId},${i})" id="edit${i}">Edit</button></td>
+              <td><button onclick="deleteStudent(${data[i].studentId})" id="delete${i}">Delete</button></td>
+              </tr>`;
+      table.append(table_row);
+    }
   }
-}
+});
 
-const editStudent = (index) => {
+const editStudent = (data, index) => {
   let editData = getData[index];
-  save_index = index;
+  save_index = data;
   $(`#row${index}`).hide();
   renderInputFields();
   $("#fname").val(editData.name);
   $("#email").val(editData.email);
   $("#password").val(editData.password);
-  $("#confirm_password").val(editData.confirm_password);
-  $("#number").val(editData.phone_no);
+  $("#confirm_password").val(editData.confirmPassword);
+  $("#number").val(editData.phoneNo);
   $("#input_feilds").attr("disabled", true);
   for (let i = 0; i < getData.length; i++) {
     $(`#edit${i}`).attr("disabled", true);
@@ -63,26 +76,54 @@ const saveData = () => {
     name: $("#fname").val(),
     email: $("#email").val(),
     password: $("#password").val(),
-    confirm_password: $("#confirm_password").val(),
-    phone_no: $("#number").val(),
+    confirmPassword: $("#confirm_password").val(),
+    phoneNo: $("#number").val(),
   };
   let isValid = true;
   isValid = formValidation(student);
 
   if (isValid) {
-    let studentData = JSON.parse(localStorage.getItem("STUDENT"));
+    let studentData;
+    studentData = getData;
+
     if (save_index != null) {
-      studentData[save_index] = student;
+      ajaxCall(
+        "PUT",
+        link,
+        (data = {
+          StudentId: save_index,
+          Name: student.name,
+          Email: student.email,
+          Password: student.password,
+          ConfirmPassword: student.confirmPassword,
+          PhoneNo: student.phoneNo,
+        }),
+        function () {
+          save_index = null;
+          location.reload();
+        }
+      );
     }
     if (studentData == null) {
       studentData = [];
     }
     if (save_index == null) {
-      studentData.push(student);
+      ajaxCall(
+        "POST",
+        link,
+        (data = {
+          Name: student.name,
+          Email: student.email,
+          Password: student.password,
+          ConfirmPassword: student.confirmPassword,
+          PhoneNo: student.phoneNo,
+        }),
+        function () {
+          save_index = null;
+          location.reload();
+        }
+      );
     }
-    localStorage.setItem("STUDENT", JSON.stringify(studentData));
-    save_index = null;
-    location.reload();
   }
 };
 
@@ -91,12 +132,12 @@ const cancelData = () => {
 };
 
 const deleteStudent = (index) => {
-  if (getData == null) {
+  if (index == null) {
     alert("Table has no record to show..");
   } else {
-    getData.splice(index, 1);
-    localStorage.setItem("STUDENT", JSON.stringify(getData));
-    location.reload();
+    ajaxCall("DELETE", link + "/" + index, "json", function () {
+      location.reload();
+    });
   }
 };
 
@@ -109,7 +150,7 @@ const formValidation = (student) => {
     alert("Not a valid Email Address..!!!");
     return false;
   }
-  if (!isValidPassword(student.password, student.confirm_password)) {
+  if (!isValidPassword(student.password, student.confirmPassword)) {
     alert("Both Passwords are not same");
     return false;
   } else return true;
