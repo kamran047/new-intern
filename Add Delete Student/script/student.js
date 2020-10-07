@@ -1,4 +1,14 @@
 let link = "http://localhost:65276/api/student";
+let courseApi;
+$.ajax({
+  type: "GET",
+  url: "http://localhost:65276/api/course",
+  dataType: "json",
+  success: function (response) {
+    courseApi = response;
+  },
+});
+
 const ajaxCall = (httpMethod, link, data, callBackMethod) => {
   $.ajax({
     type: httpMethod,
@@ -16,13 +26,13 @@ ajaxCall("GET", link, "json", function (data) {
   if (data != null) {
     for (i = 0; i < data.length; i++) {
       let table_row = `<tr id=row${i}>
-              <td>${data[i].name}</td>
-              <td >${data[i].email}</td>
-              <td >${data[i].password}</td>
-              <td >${data[i].confirmPassword}</td>
-              <td >${data[i].phoneNo}</td>
-              <td> <button onclick="editStudent(${data[i].studentId},${i})" id="edit${i}">Edit</button></td>
-              <td><button onclick="deleteStudent(${data[i].studentId})" id="delete${i}">Delete</button></td>
+              <td>${data[i].student.name}</td>
+              <td >${data[i].student.email}</td>
+              <td >${data[i].student.password}</td>
+              <td >${data[i].student.confirmPassword}</td>
+              <td >${data[i].student.phoneNo}</td>
+              <td> <button onclick="editStudent(${data[i].student.studentId},${i})" id="edit${i}">Edit</button></td>
+              <td><button onclick="deleteStudent(${data[i].student.studentId})" ${console.log(data[i].studentId)} id="delete${i}">Delete</button></td>
               </tr>`;
       table.append(table_row);
     }
@@ -34,11 +44,11 @@ const editStudent = (data, index) => {
   save_index = data;
   $(`#row${index}`).hide();
   renderInputFields();
-  $("#fname").val(editData.name);
-  $("#email").val(editData.email);
-  $("#password").val(editData.password);
-  $("#confirm_password").val(editData.confirmPassword);
-  $("#number").val(editData.phoneNo);
+  $("#fname").val(editData.student.name);
+  $("#email").val(editData.student.email);
+  $("#password").val(editData.student.password);
+  $("#confirm_password").val(editData.student.confirmPassword);
+  $("#number").val(editData.student.phoneNo);
   $("#input_feilds").attr("disabled", true);
   for (let i = 0; i < getData.length; i++) {
     $(`#edit${i}`).attr("disabled", true);
@@ -64,11 +74,14 @@ const renderInputFields = (flag) => {
     <td>
     <input id="number" type="number" required />
     </td>
+    <td><select id="course_data" multiple="multiple">${courseApi.map(
+      (element) =>
+        `<option value="${element.courseId}">${element.courseName}</option>`
+    )}</select></td>
     <td> <button onclick="saveData()" id="save">Save</button></td>
-      <td><button onclick="cancelData()" id="cancel">Cancel</button></td>
+    <td><button onclick="cancelData()" id="cancel">Cancel</button></td>
       </tr>`;
   table.append(table_row);
-  console.log("This method is working.");
 };
 
 const saveData = () => {
@@ -79,6 +92,7 @@ const saveData = () => {
     confirmPassword: $("#confirm_password").val(),
     phoneNo: $("#number").val(),
   };
+  var course = $("#course_data").val();
   let isValid = true;
   isValid = formValidation(student);
 
@@ -91,12 +105,15 @@ const saveData = () => {
         "PUT",
         link,
         (data = {
-          StudentId: save_index,
-          Name: student.name,
-          Email: student.email,
-          Password: student.password,
-          ConfirmPassword: student.confirmPassword,
-          PhoneNo: student.phoneNo,
+          Student: {
+            StudentId: save_index,
+            Name: student.name,
+            Email: student.email,
+            Password: student.password,
+            ConfirmPassword: student.confirmPassword,
+            PhoneNo: student.phoneNo,
+          },
+          Courses: course,
         }),
         function () {
           save_index = null;
@@ -112,11 +129,14 @@ const saveData = () => {
         "POST",
         link,
         (data = {
-          Name: student.name,
-          Email: student.email,
-          Password: student.password,
-          ConfirmPassword: student.confirmPassword,
-          PhoneNo: student.phoneNo,
+          Student: {
+            Name: student.name,
+            Email: student.email,
+            Password: student.password,
+            ConfirmPassword: student.confirmPassword,
+            PhoneNo: student.phoneNo,
+          },
+          Courses: course,
         }),
         function () {
           save_index = null;
