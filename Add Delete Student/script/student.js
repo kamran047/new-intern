@@ -1,14 +1,5 @@
-let link = "http://localhost:65276/api/student";
+let link = "http://localhost:65276/api/";
 let courseApi;
-$.ajax({
-  type: "GET",
-  url: "http://localhost:65276/api/course",
-  dataType: "json",
-  success: function (response) {
-    courseApi = response;
-  },
-});
-
 const ajaxCall = (httpMethod, link, data, callBackMethod) => {
   $.ajax({
     type: httpMethod,
@@ -18,10 +9,14 @@ const ajaxCall = (httpMethod, link, data, callBackMethod) => {
   });
 };
 
+ajaxCall("GET",  link + course , "json", function (response) {
+  courseApi = response;
+});
+
 let table = $("#table_data");
 let save_index = null;
 let getData;
-ajaxCall("GET", link, "json", function (data) {
+ajaxCall("GET",  link + student, "json", function (data) {
   getData = data;
   if (data != null) {
     for (i = 0; i < data.length; i++) {
@@ -103,7 +98,7 @@ const saveData = () => {
     if (save_index != null) {
       ajaxCall(
         "PUT",
-        link,
+        link + student,
         (data = {
           Student: {
             StudentId: save_index,
@@ -127,7 +122,7 @@ const saveData = () => {
     if (save_index == null) {
       ajaxCall(
         "POST",
-        link,
+        link + student,
         (data = {
           Student: {
             Name: student.name,
@@ -155,7 +150,7 @@ const deleteStudent = (index) => {
   if (index == null) {
     alert("Table has no record to show..");
   } else {
-    ajaxCall("DELETE", link + "/" + index, "json", function () {
+    ajaxCall("DELETE",  link + student + "/" + index, "json", function () {
       location.reload();
     });
   }

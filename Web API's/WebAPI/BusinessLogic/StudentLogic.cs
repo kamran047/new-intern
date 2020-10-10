@@ -23,7 +23,7 @@ namespace BusinessLogic
                     //Getting student id and coursse id from the Student and course table using view model and saving them in Student Courses table
                     context.StudentCourses
                         .Add(new StudentCourse { StudentId = viewModel.Student.StudentId, CourseId = int.Parse(course) });
-
+                    //int.Parse(course)
                 }
                 context.SaveChanges();
             }
@@ -49,19 +49,6 @@ namespace BusinessLogic
                 }
             }
             return studentViewModels;
-        }
-
-        public void DeleteStudentCourse(int id)
-        {
-            using (var context = new Context())
-            {
-                var deleteStudentCourses = context.StudentCourses.Where(sc => sc.StudentId == id).ToList();
-                foreach (var studentCourse in deleteStudentCourses)
-                {
-                    context.StudentCourses.Remove(studentCourse);
-                }
-                context.SaveChanges();
-            }
         }
 
         public void UpdatestudentCourse(StudentViewModel viewModel)
