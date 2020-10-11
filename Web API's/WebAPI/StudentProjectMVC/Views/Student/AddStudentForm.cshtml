@@ -1,0 +1,71 @@
+﻿@model DataLayer.StudentCourseViewModel
+@{
+    ViewBag.Title = "AddStudentForm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("SaveStudent", "Student"))
+{
+    @Html.HiddenFor(m => m.Student.StudentId)
+
+    <div>
+        @Html.LabelFor(m => m.Student.Name)
+        @Html.TextBoxFor(m => m.Student.Name)
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Student.Email)
+        @Html.TextBoxFor(m => m.Student.Email)
+
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Student.Password)
+        @Html.TextBoxFor(m => m.Student.Password)
+    </div>
+
+    <div>
+        @Html.LabelFor(m => m.Student.ConfirmPassword)
+        @Html.TextBoxFor(m => m.Student.ConfirmPassword)
+    </div>
+    <div>
+        @Html.LabelFor(m => m.Student.PhoneNo)
+        @Html.TextBoxFor(m => m.Student.PhoneNo)
+    </div>
+
+    <div>
+            <label> Select Courses </label>
+            <select multiple name="Courses" id="select_courses">
+
+                @if (Model.Courses == null)
+                {
+                    foreach (var course in Model.CoursesList)
+                    {
+                        <option value="@course.CourseId">@course.CourseName</option>
+                    }
+                }
+                else
+                {
+                    foreach (var course in Model.CoursesList)
+                    {
+                        var courseCheck = false;
+                        foreach (var StudentCourseId in Model.Courses)
+                        {
+                            if (StudentCourseId == course.CourseId.ToString())
+                            {
+                                <option selected value="@course.CourseId">@course.CourseName</option>
+                                courseCheck = true;
+                            }
+                        }
+                        if (!courseCheck)
+                        {
+                            <option value="@course.CourseId">@course.CourseName</option>
+                        }
+
+                    }
+                }
+
+            </select>
+    </div>
+                <button type="submit">Add Student</button>
+            }
