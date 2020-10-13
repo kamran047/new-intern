@@ -4,35 +4,62 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<table class="table table-bordered table-responsive table-hover">
-    <tr>
+<table id="recordDisplayingTable" class="table table-bordered table-responsive table-hover">
+    <thead>
         <th>Name  </th>
         <th>Email </th>
         <th>Password </th>
         <th>Confirm Password</th>
         <th>Phone No</th>
         <th>Subjects</th>
-    </tr>
-    @foreach (var students in Model.StudentViewModels)
-    {
-    <tr>
-        <td> @students.Student.Name </td>
-        <td> @students.Student.Email</td>
-        <td> @students.Student.Password</td>
-        <td> @students.Student.ConfirmPassword</td>
-        <td> @students.Student.PhoneNo</td>
-        <td>
-            <ul>
-                @foreach (var coursesId in students.Courses)
-                {
-
-                    var course = Model.CoursesList.SingleOrDefault(c => c.CourseId == Convert.ToInt32(coursesId));
-                    <li> @course.CourseName</li>
-                }
-            </ul>
-        </td>
-        <td><button><a href="@Url.Action("UpdateStudentRecord", "Student", new { id = students.Student.StudentId })">Edit</a></button>
-        <td><button><a href="@Url.Action("DeleteStudentRecord","Student",new { id = students.Student.StudentId})">Delete</a></button></td>
-    </tr>
-    }
+        <th>Edit</th>
+        <th>Delete</th>
+    </thead>
+    <tbody></tbody>
 </table>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $("#recordDisplayingTable").DataTable({
+                  "processing": true,
+                "serverSide": true,
+                "processing": true,
+                "orderMulti": false,
+                  ajax: {
+                      url: "/Student/AjaxGetJsonData",
+                      type: "POST",
+                      dataSrc: "data",
+                  },
+                  "columns": [
+                      { "data": "Student.Name" },
+                      { "data": "Student.Email" },
+                      { "data": "Student.Password" },
+                      { "data": "Student.ConfirmPassword" },
+                      { "data": "Student.PhoneNo" },
+                      {
+                          data: "Courses",
+                          render: function (data, type, row) {
+                              let courseList = "<ul>";
+                              row.Courses.forEach(course => { courseList += `<li>${course}</li>` });
+                              courseList += "</ul>";
+                              return courseList;
+                          }
+                      },
+                      {
+                          data: "Student.StudentId",
+                          render: function (data, type, row) {
+                              return `<a href="/Student/UpdateStudentRecord/${data}"><button>Edit</button></a>`;
+                          }
+                      },
+                      {
+                          data: "Student.StudentId",
+                          render: function (data, type, row) {
+                              return `<a href="/Student/DeleteStudentRecord/${data}"><button>Delete</button></a>`;
+                          }
+                      }
+                  ]
+              });
+    });
+    </script>
+    }

@@ -11,19 +11,34 @@ namespace StudentProjectMVC.Controllers
 {
     public class StudentController : Controller
     {
-        StudentLogic studentRepository = new StudentLogic(new Context());
-        CourseLogic courseRepository = new CourseLogic(new Context());
+        StudentLogic studentRepository = new StudentLogic();
+        CourseLogic courseRepository = new CourseLogic();
 
         public ActionResult StudentList()
         {
             //Getting student list using studentContext object and passing it to GetStudentCourse method to get the list of courses of students.
             var viewModel = studentRepository.GetStudentCourse(studentRepository.Get()).ToList();
-            //Making an Object of StudentCourseViewModel and passing it directly to the view.
-            return View(new StudentCourseViewModel
-            {
-                StudentViewModels = viewModel,
-                CoursesList = courseRepository.Get().ToList()
-            });
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult AjaxGetJsonData()
+        {
+            var draw = Request.Form.GetValues("draw").FirstOrDefault();
+            var start = Request.Form.GetValues("start").FirstOrDefault();
+            var length = Request.Form.GetValues("length").FirstOrDefault();
+            var viewModel = studentRepository.GetStudentCourse(studentRepository.Get()).ToList();
+            int pageSize = length != null ? Convert.ToInt32(length) : 0;
+            int skip = start != null ? Convert.ToInt32(start) : 0;
+            return Json(
+                new
+                {
+                    draw = draw,
+                    recordsFiltered = viewModel.Count,
+                    recordsTotal = viewModel.Count,
+                    data = viewModel.Skip(skip).Take(pageSize).ToList(),
+                },
+                    JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
