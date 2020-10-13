@@ -18,38 +18,37 @@ ajaxCall(
     courseApi = response;
   },
   function () {
-    alert("Failed to Load Courses.")
+    alert("Failed to Load Courses.");
   }
 );
 let table = $("#table_data");
 let save_index = null;
 let getData;
-ajaxCall("GET", link + "student", "json", function (data) {
-  getData = data;
-  if (data != null) {
-    for (i = 0; i < data.length; i++) {
-      let table_row = `<tr id=row${i}>
+ajaxCall(
+  "GET",
+  link + "student",
+  "json",
+  function (data) {
+    getData = data;
+    if (data != null) {
+      for (i = 0; i < data.length; i++) {
+        let table_row = `<tr id=row${i}>
               <td>${data[i].student.name}</td>
               <td >${data[i].student.email}</td>
               <td >${data[i].student.password}</td>
               <td >${data[i].student.confirmPassword}</td>
               <td >${data[i].student.phoneNo}</td>
-              <td> <button onclick="editStudent(${
-                data[i].student.studentId
-              },${i})" id="edit${i}">Edit</button></td>
-              <td><button onclick="deleteStudent(${
-                data[i].student.studentId
-              })" ${console.log(
-        data[i].studentId
-      )} id="delete${i}">Delete</button></td>
+              <td> <button onclick="editStudent(${data[i].student.studentId},${i})" id="edit${i}">Edit</button></td>
+              <td><button onclick="deleteStudent(${data[i].student.studentId})" id="delete${i}">Delete</button></td>
               </tr>`;
-      table.append(table_row);
+        table.append(table_row);
+      }
     }
+  },
+  function () {
+    alert("Failed to Load Students data.");
   }
-}, 
-function(){
-  alert("Failed to Load Students data.");
-});
+);
 
 const editStudent = (data, index) => {
   let editData = getData[index];
@@ -131,7 +130,7 @@ const saveData = () => {
           save_index = null;
           location.reload();
         },
-        function(){
+        function () {
           alert("Failed to Update Student data.");
         }
       );
@@ -157,7 +156,7 @@ const saveData = () => {
           save_index = null;
           location.reload();
         },
-        function(){
+        function () {
           alert("Failed to Add Student data.");
         }
       );
@@ -173,12 +172,16 @@ const deleteStudent = (index) => {
   if (index == null) {
     alert("Table has no record to show..");
   } else {
-    ajaxCall("DELETE", link + "student/" + index, "json", function () {
-      location.reload();
-    },
-    function(){
-      alert("Failed to Delete Student data.");
-    }
+    ajaxCall(
+      "DELETE",
+      link + "student/" + index,
+      "json",
+      function () {
+        location.reload();
+      },
+      function () {
+        alert("Failed to Delete Student data.");
+      }
     );
   }
 };
