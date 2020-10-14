@@ -10,7 +10,7 @@ namespace BusinessLogic
 {
     public class StudentLogic : BaseRepository<Student>
     {
-        public StudentLogic(Context context) : base(context)
+        public StudentLogic() : base()
         {
         }
 
@@ -23,11 +23,9 @@ namespace BusinessLogic
                     //Getting student id and coursse id from the Student and course table using view model and saving them in Student Courses table
                     context.StudentCourses
                         .Add(new StudentCourse { StudentId = viewModel.Student.StudentId, CourseId = int.Parse(course) });
-                    //int.Parse(course)
                 }
                 context.SaveChanges();
             }
-
         }
 
         public IEnumerable<StudentViewModel> GetStudentCourse(IEnumerable<Student> students)
@@ -40,11 +38,10 @@ namespace BusinessLogic
                     //Getting student object and courses with respect to particular student id's and storing them in View Model
                     var studentCourse = context.StudentCourses
                         .Where(sc => sc.StudentId == student.StudentId)
-                        .Select(sc => sc.CourseId.ToString())
+                        .Select(sc => sc.Course.CourseName.ToString())
                         .ToList();
 
                     var viewModel = new StudentViewModel { Student = student, Courses = studentCourse };
-
                     studentViewModels.Add(viewModel);
                 }
             }
@@ -65,6 +62,30 @@ namespace BusinessLogic
                     context.StudentCourses.Add(new StudentCourse { StudentId = viewModel.Student.StudentId, CourseId = int.Parse(course) });
                 }
                 context.SaveChanges();
+            }
+        }
+
+        public decimal AddStudentBySP(StudentViewModel model)
+        {
+            using (var context = new Context())
+            {
+               return context.spInsertRecord(model.Student);
+            }
+        }
+
+        public void AddCoursesBySP(StudentViewModel model, decimal id)
+        {
+            using (var context = new Context())
+            {
+                context.spInsertCourses(model,id);
+            }
+        }
+
+        public void DeleteRecordBySP(int id)
+        {
+            using (var context = new Context())
+            {
+                context.spDeleteRecord(id);
             }
         }
     };

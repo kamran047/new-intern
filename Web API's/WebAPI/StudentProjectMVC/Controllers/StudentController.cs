@@ -16,13 +16,11 @@ namespace StudentProjectMVC.Controllers
 
         public ActionResult StudentList()
         {
-            //Getting student list using studentContext object and passing it to GetStudentCourse method to get the list of courses of students.
-            var viewModel = studentRepository.GetStudentCourse(studentRepository.Get()).ToList();
             return View();
         }
 
         [HttpPost]
-        public ActionResult AjaxGetJsonData()
+        public ActionResult LoadStudentsData()
         {
             var draw = Request.Form.GetValues("draw").FirstOrDefault();
             var start = Request.Form.GetValues("start").FirstOrDefault();
@@ -53,8 +51,8 @@ namespace StudentProjectMVC.Controllers
             //This will run when new student is added to the list.
             if (model.Student.StudentId == 0)
             {
-                studentRepository.Add(model.Student);
-                studentRepository.AddStudentCourse(model);
+                //Getting Student id by passing model to AddStudentBySP method and passing it as a parameter in AddCoursesBySP method. 
+                studentRepository.AddCoursesBySP(model, studentRepository.AddStudentBySP(model));   
             }
             //This code will run when we will update student record.
             else
@@ -67,7 +65,7 @@ namespace StudentProjectMVC.Controllers
 
         public ActionResult DeleteStudentRecord(int id)
         {
-            studentRepository.Delete(id);
+            studentRepository.DeleteRecordBySP(id);
             return RedirectToAction("StudentList");
         }
 
