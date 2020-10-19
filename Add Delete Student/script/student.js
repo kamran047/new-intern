@@ -1,43 +1,54 @@
-let link = "http://localhost:65276/api/student";
+let link = "http://localhost:65276/api/";
 let courseApi;
-$.ajax({
-  type: "GET",
-  url: "http://localhost:65276/api/course",
-  dataType: "json",
-  success: function (response) {
-    courseApi = response;
-  },
-});
-
-const ajaxCall = (httpMethod, link, data, callBackMethod) => {
+const ajaxCall = (httpMethod, link, data, handleSuccess, handleFail) => {
   $.ajax({
     type: httpMethod,
     url: link,
     data: data,
-    success: callBackMethod,
+    success: handleSuccess,
+    fail: handleFail,
   });
 };
 
+ajaxCall(
+  "GET",
+  link + "course",
+  "json",
+  function (response) {
+    courseApi = response;
+  },
+  function () {
+    alert("Failed to Load Courses.");
+  }
+);
 let table = $("#table_data");
 let save_index = null;
 let getData;
-ajaxCall("GET", link, "json", function (data) {
-  getData = data;
-  if (data != null) {
-    for (i = 0; i < data.length; i++) {
-      let table_row = `<tr id=row${i}>
+ajaxCall(
+  "GET",
+  link + "student",
+  "json",
+  function (data) {
+    getData = data;
+    if (data != null) {
+      for (i = 0; i < data.length; i++) {
+        let table_row = `<tr id=row${i}>
               <td>${data[i].student.name}</td>
               <td >${data[i].student.email}</td>
               <td >${data[i].student.password}</td>
               <td >${data[i].student.confirmPassword}</td>
               <td >${data[i].student.phoneNo}</td>
               <td> <button onclick="editStudent(${data[i].student.studentId},${i})" id="edit${i}">Edit</button></td>
-              <td><button onclick="deleteStudent(${data[i].student.studentId})" ${console.log(data[i].studentId)} id="delete${i}">Delete</button></td>
+              <td><button onclick="deleteStudent(${data[i].student.studentId})" id="delete${i}">Delete</button></td>
               </tr>`;
-      table.append(table_row);
+        table.append(table_row);
+      }
     }
+  },
+  function () {
+    alert("Failed to Load Students data.");
   }
-});
+);
 
 const editStudent = (data, index) => {
   let editData = getData[index];
@@ -103,7 +114,7 @@ const saveData = () => {
     if (save_index != null) {
       ajaxCall(
         "PUT",
-        link,
+        link + "student",
         (data = {
           Student: {
             StudentId: save_index,
@@ -118,6 +129,9 @@ const saveData = () => {
         function () {
           save_index = null;
           location.reload();
+        },
+        function () {
+          alert("Failed to Update Student data.");
         }
       );
     }
@@ -127,7 +141,7 @@ const saveData = () => {
     if (save_index == null) {
       ajaxCall(
         "POST",
-        link,
+        link + "student",
         (data = {
           Student: {
             Name: student.name,
@@ -141,6 +155,9 @@ const saveData = () => {
         function () {
           save_index = null;
           location.reload();
+        },
+        function () {
+          alert("Failed to Add Student data.");
         }
       );
     }
@@ -155,9 +172,17 @@ const deleteStudent = (index) => {
   if (index == null) {
     alert("Table has no record to show..");
   } else {
-    ajaxCall("DELETE", link + "/" + index, "json", function () {
-      location.reload();
-    });
+    ajaxCall(
+      "DELETE",
+      link + "student/" + index,
+      "json",
+      function () {
+        location.reload();
+      },
+      function () {
+        alert("Failed to Delete Student data.");
+      }
+    );
   }
 };
 
