@@ -11,6 +11,13 @@ namespace WebAPI
 {
     public class MyAuthorizationServerProvider : OAuthAuthorizationServerProvider
     {
+        private IUserLogic _repository;
+
+        public MyAuthorizationServerProvider(IUserLogic repository)
+        {
+            _repository = repository;
+        }
+
         public override async Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
         {
             context.Validated();
@@ -18,9 +25,9 @@ namespace WebAPI
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
-            using (UserLogic _repo = new UserLogic())
-            {
-                var user = _repo.ValidateUser(context.UserName, context.Password);
+            var username = context.UserName;
+            var password = context.Password;
+            var user = _repository.ValidateUser(context.UserName, context.Password);
                 if (user == null)
                 {
                     context.SetError("invalid_grant", "Provided username and password is incorrect");
@@ -31,7 +38,7 @@ namespace WebAPI
                 identity.AddClaim(new Claim(ClaimTypes.Name, user.UserName));
                 identity.AddClaim(new Claim("Email", user.UserEmail));
                 context.Validated(identity);
-            }
+
         }
     }
 }

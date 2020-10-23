@@ -1,20 +1,22 @@
 ﻿using DataLayer;
 using Model;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BusinessLogic
 {
-    public class UserLogic: IDisposable
+    public class UserLogic : IDisposable, IUserLogic
     {
-       Context context =new Context();
+        private IContext _context;
+        public UserLogic(IContext context)
+        {
+            _context = context;
+        }
+
         public User ValidateUser(string username, string password)
         {
             {
-                return context.Users.FirstOrDefault(user =>
+                return _context.Users.FirstOrDefault(user =>
                        user.UserName.Equals(username, StringComparison.OrdinalIgnoreCase)
                        && user.UserPassword == password);
             }
@@ -22,7 +24,7 @@ namespace BusinessLogic
 
         public void Dispose()
         {
-            context.Dispose();
+            _context.Dispose();
         }
     }
 }
