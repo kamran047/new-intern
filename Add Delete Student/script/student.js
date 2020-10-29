@@ -2,12 +2,28 @@ let link = "http://localhost:65276/api/";
 let courseApi;
 const ajaxCall = (httpMethod, link, data, handleSuccess, handleFail) => {
   $.ajax({
+    headers: {
+      Authorization: getAccessToken(),
+    },
     type: httpMethod,
     url: link,
     data: data,
     success: handleSuccess,
     fail: handleFail,
   });
+};
+
+const getAccessToken = () => {
+  return sessionStorage.getItem("accessToken") == null
+    ? null
+    : "Bearer " + JSON.parse(sessionStorage.getItem("accessToken"));
+};
+
+const logoutFuntionality = () => {
+  if (sessionStorage.getItem("accessToken") != null) {
+    sessionStorage.removeItem("accessToken");
+    location.href = "../html/login.html";
+  }
 };
 
 ajaxCall(

@@ -1,50 +1,44 @@
 ﻿using DataLayer;
-using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BusinessLogic
 {
-    public class BaseRepository<TEntity> where TEntity : class
+    public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
     {
         DbSet<TEntity> dbSet;
-        Context context;
+        private IContext _context;
 
-        public BaseRepository(Context context)
+        public BaseRepository(IContext context)
         {
-            this.context=context;
-            this.dbSet = context.Set<TEntity>();
-
+            _context = context;
+            this.dbSet = _context.Set<TEntity>();
         }
 
         public IEnumerable<TEntity> Get()
         {
-                 return dbSet.ToList();
-            
+            return dbSet.ToList();
         }
 
         public void Add(TEntity entity)
         {
-                    dbSet.Add(entity);
-                    context.SaveChanges();
+            dbSet.Add(entity);
+            _context.SaveChanges();
         }
 
         public void Update(TEntity entityToUpdate)
         {
             dbSet.Attach(entityToUpdate);
-            context.Entry(entityToUpdate).State = EntityState.Modified;
-            context.SaveChanges();
-               
+            _context.Entry(entityToUpdate).State = EntityState.Modified;
+            _context.SaveChanges();
         }
 
         public void Delete(int id)
         {
             var entityToDelete = dbSet.Find(id);
             dbSet.Remove(entityToDelete);
-            context.SaveChanges();
+            _context.SaveChanges();
         }
     }
 }
