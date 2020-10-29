@@ -21,6 +21,11 @@ namespace BusinessLogic
             return dbSet.ToList();
         }
 
+        public TEntity GetOne(int id)
+        {
+            return dbSet.Find(id);
+        }
+
         public void Add(TEntity entity)
         {
             dbSet.Add(entity);

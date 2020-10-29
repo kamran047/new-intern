@@ -12,5 +12,7 @@ namespace BusinessLogic
         void DeleteRecordBySP(int id);
         IEnumerable<StudentViewModel> GetStudentCourse(IEnumerable<Student> students);
         void UpdatestudentCourse(StudentViewModel viewModel);
+        StudentViewModel GetOneStudentWithCourses(int id);
+        List<StudentCompositeModel> GetStudentsWithCourses(List<StudentViewModel> viewModelList);
     }
 }

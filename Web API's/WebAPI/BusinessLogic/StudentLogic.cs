@@ -14,6 +14,19 @@ namespace BusinessLogic
             _context = context;
         }
 
+        public StudentViewModel GetOneStudentWithCourses(int id)
+        {
+            var student = new StudentLogic(_context);
+            return new StudentViewModel
+            {
+                Student =student.GetOne(id),
+                Courses = _context.StudentCourses
+                     .Where(sc => sc.StudentId == id)
+                     .Select(sc => sc.CourseId.ToString())
+                     .ToList()
+            };
+        }
+
         public void AddStudentCourse(StudentViewModel viewModel)
         {
             foreach (var course in viewModel.Courses)
@@ -69,6 +82,26 @@ namespace BusinessLogic
         public void DeleteRecordBySP(int id)
         {
             _context.spDeleteRecord(id);
+        }
+
+        public List<StudentCompositeModel> GetStudentsWithCourses(List<StudentViewModel> viewModelList)
+        {
+            var compositeModel = new List<StudentCompositeModel>();
+            foreach (var model in viewModelList)
+            {             
+                compositeModel.Add(new StudentCompositeModel
+                {
+                    StudentId = model.Student.StudentId,
+                    Name = model.Student.Name,
+                    Email = model.Student.Email,
+                    Password = model.Student.Password,
+                    ConfirmPassword = model.Student.Password,
+                    PhoneNo = model.Student.PhoneNo,
+                    CourseName = string.Join(",", model.Courses.ToArray())
+                }
+                );
+            }        
+            return compositeModel;
         }
     };
 }
