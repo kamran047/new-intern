@@ -5,6 +5,8 @@ using Model;
 using Ninject;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace StudentDesktopApp
@@ -14,6 +16,7 @@ namespace StudentDesktopApp
         private int studentId;
         private IStudentLogic _student;
         private ICourseLogic _course;
+        Label filePath = new Label();
         public UpdateForm(int studentId)
         {
             InitializeComponent();
@@ -26,6 +29,7 @@ namespace StudentDesktopApp
         public void LoadFormData()
         {
             StudentViewModel model = new StudentViewModel();
+            string getImagePath= @"E:\Projects\Internship\Web API's\WebAPI\StudentDesktopApp\Images\";
 
             model = _student.GetOneStudentWithCourses(studentId);
             nameTxt.Text = model.Student.Name;
@@ -33,6 +37,7 @@ namespace StudentDesktopApp
             passwordTxt.Text = model.Student.Password;
             confirmPasswordTxt.Text = model.Student.ConfirmPassword;
             phoneNoTxt.Text = model.Student.PhoneNo.ToString();
+            updateImage.Image = Image.FromFile(getImagePath+model.Student.ImagePath);
 
             coursesList.DataSource = _course.Get();
             coursesList.DisplayMember = "CourseName";
@@ -58,6 +63,7 @@ namespace StudentDesktopApp
             Student studentModel = _student.GetOne(studentId);
             StudentViewModel model = new StudentViewModel();
             List<string> coursesIdList = new List<string>();
+            File.Copy(filePath.Text, Path.Combine(@"E:\Projects\Internship\Web API's\WebAPI\StudentDesktopApp\Images\", Path.GetFileName(filePath.Text)));
 
             studentModel.StudentId = studentId;
             studentModel.Name = nameTxt.Text;
@@ -65,6 +71,7 @@ namespace StudentDesktopApp
             studentModel.Password = passwordTxt.Text;
             studentModel.ConfirmPassword = confirmPasswordTxt.Text;
             studentModel.PhoneNo = Convert.ToInt32(phoneNoTxt.Text);
+            studentModel.ImagePath = fileName.Text;
             model.Student = studentModel;
 
             foreach (var selected_courses in coursesList.SelectedItems)
@@ -79,6 +86,23 @@ namespace StudentDesktopApp
             this.Close();
             StudentListing studentListing = new StudentListing();
             studentListing.Show();
+        }
+
+        private void updateImage_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            PictureBox pictureBox = sender as PictureBox;
+            if (pictureBox != null)
+            {
+                openFile.Filter = "(*.jpg; *.jpeg; *.png;) | *.jpg; *.jpeg; *.png;";
+                if (openFile.ShowDialog() == DialogResult.OK)
+                {
+                    pictureBox.Image = Image.FromFile(openFile.FileName);
+                    filePath.Text = openFile.FileName;
+                    fileName.Text = Path.GetFileName(openFile.FileName);
+                    fileName.Visible = true;
+                }
+            }
         }
     }
 }

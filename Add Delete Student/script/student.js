@@ -1,5 +1,6 @@
 let link = "http://localhost:65276/api/";
 let courseApi;
+let base64Image;
 const ajaxCall = (httpMethod, link, data, handleSuccess, handleFail) => {
   $.ajax({
     headers: {
@@ -101,6 +102,9 @@ const renderInputFields = (flag) => {
     <td>
     <input id="number" type="number" required />
     </td>
+    <td> 
+      <input type="file" id="imageUpload" onchange="convertToBase64()"/>
+     </td>
     <td><select id="course_data" multiple="multiple">${courseApi.map(
       (element) =>
         `<option value="${element.courseId}">${element.courseName}</option>`
@@ -141,6 +145,7 @@ const saveData = () => {
             PhoneNo: student.phoneNo,
           },
           Courses: course,
+          ImagePath: base64Image,
         }),
         function () {
           save_index = null;
@@ -167,6 +172,7 @@ const saveData = () => {
             PhoneNo: student.phoneNo,
           },
           Courses: course,
+          ImagePath: base64Image,
         }),
         function () {
           save_index = null;
@@ -216,3 +222,17 @@ const formValidation = (student) => {
     return false;
   } else return true;
 };
+
+ const convertToBase64=()=>{
+  var selectFile = $("#imageUpload")[0].files;
+    if (selectFile.length > 0) {
+      var selectFile = selectFile[0];
+      var fileReader = new FileReader();
+      fileReader.onload = function (FileLoadEvent) {
+        var srcData = FileLoadEvent.target.result;
+        let baseArray = srcData.split(",");
+        base64Image = baseArray;
+      };
+      fileReader.readAsDataURL(selectFile);
+    }
+ }

@@ -5,12 +5,8 @@ using Model;
 using Ninject;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows.Forms;
 
 namespace StudentDesktopApp
@@ -19,6 +15,7 @@ namespace StudentDesktopApp
     {
         private IStudentLogic _student;
         private ICourseLogic _course;
+        Label filePath = new Label();
         public AddStudentForm()
         {
             InitializeComponent();
@@ -40,12 +37,14 @@ namespace StudentDesktopApp
             Student studentModel = new Student();
             StudentViewModel model = new StudentViewModel();
             List<string> coursesIdList = new List<string>();
+            File.Copy(filePath.Text, Path.Combine(@"E:\Projects\Internship\Web API's\WebAPI\StudentDesktopApp\Images\", Path.GetFileName(filePath.Text)));
 
             studentModel.Name = nameTxt.Text;
             studentModel.Email = emailTxt.Text;
             studentModel.Password = passwordTxt.Text;
             studentModel.ConfirmPassword = confirmPasswordTxt.Text;
             studentModel.PhoneNo = Convert.ToInt32(phoneNoTxt.Text);
+            studentModel.ImagePath = fileName.Text;
             model.Student = studentModel;
 
             foreach (var selected_courses in coursesList.SelectedItems)
@@ -62,5 +61,21 @@ namespace StudentDesktopApp
             studentListing.Show();
         }
 
+        private void studentImage_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            PictureBox pictureBox = sender as PictureBox;
+            if (pictureBox != null)
+            {
+                openFile.Filter = "(*.jpg; *.jpeg; *.png;) | *.jpg; *.jpeg; *.png;";
+                if (openFile.ShowDialog() == DialogResult.OK)
+                {
+                    pictureBox.Image = Image.FromFile(openFile.FileName);
+                    filePath.Text = openFile.FileName;
+                    fileName.Text = Path.GetFileName(openFile.FileName);
+                    fileName.Visible=true;
+                }
+            }
+        }
     }
 }
