@@ -1,10 +1,9 @@
 ﻿using BusinessLogic;
 using DataLayer;
-using Model;
 using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Web;
 using System.Web.Http;
 
@@ -32,6 +31,22 @@ namespace WebAPI.Controllers
         [HttpPost]
         public IHttpActionResult AddStudent(StudentViewModel viewModel)
         {
+            char[] seperator = { ':', '/', ';' };
+            String[] strlist = viewModel.ImagePath[0].Split(seperator);
+            byte[] bytes = Convert.FromBase64String(viewModel.ImagePath[1]);
+            Image image;
+            using (MemoryStream ms = new MemoryStream(bytes))
+            {
+                image = Image.FromStream(ms);
+            }
+            var subpath = "~/Images/";
+            bool exist = Directory.Exists(HttpContext.Current.Server.MapPath(subpath));
+            if (!exist) Directory.CreateDirectory(HttpContext.Current.Server.MapPath(subpath));
+            var fileName = viewModel.Student.Name + "." + strlist[2];
+            var filepath = HttpContext.Current.Server.MapPath("~/Images/");
+            var path = Path.Combine(filepath, fileName);
+            if (strlist[2] == "png") image.Save(path, ImageFormat.Png);
+            viewModel.Student.ImagePath = fileName;
             _student.Add(viewModel.Student);
             _student.AddStudentCourse(viewModel);
             return Ok("Student Added");
@@ -40,7 +55,32 @@ namespace WebAPI.Controllers
         [HttpPut]
         public IHttpActionResult UpdateStudent(StudentViewModel viewModel)
         {
-            _student.Update(viewModel.Student);
+            if (viewModel.Student == null) return BadRequest();
+            char[] seperator = { ':', '/', ';' };
+            String[] strlist = viewModel.ImagePath[0].Split(seperator);
+            byte[] bytes = Convert.FromBase64String(viewModel.ImagePath[1]);
+            Image image;
+            using (MemoryStream ms = new MemoryStream(bytes))
+            {
+                image = Image.FromStream(ms);
+            }
+            var subpath = "~/Images/";
+            bool exist = Directory.Exists(HttpContext.Current.Server.MapPath(subpath));
+            if (!exist) Directory.CreateDirectory(HttpContext.Current.Server.MapPath(subpath));
+            var fileName = viewModel.Student.Name + "." + strlist[2];
+            var filepath = HttpContext.Current.Server.MapPath("~/Images/");
+            var path = Path.Combine(filepath, fileName);
+            if (strlist[2] == "png") image.Save(path, ImageFormat.Png);
+
+            var updatedStudent = _student.GetOne(viewModel.Student.StudentId);
+            updatedStudent.Name = viewModel.Student.Name;
+            updatedStudent.Email = viewModel.Student.Email;
+            updatedStudent.Password = viewModel.Student.Password;
+            updatedStudent.ConfirmPassword = viewModel.Student.ConfirmPassword;
+            updatedStudent.PhoneNo = viewModel.Student.PhoneNo;
+            updatedStudent.ImagePath = fileName;
+
+            _student.Update(updatedStudent);
             _student.UpdatestudentCourse(viewModel);
             return Ok("Student Updated");
         }
